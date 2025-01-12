@@ -1,6 +1,6 @@
 import './globals.css';
-import LayoutBackground from '@/components/layout-background';
-import MealsHeader from '@/components/main-header';
+import LayoutBackground from '@/components/main-header/layout-background';
+import MealsHeader from '@/components/main-header/main-header';
 
 export const metadata = {
   title: 'NextLevel Food',
