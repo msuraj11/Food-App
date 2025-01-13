@@ -1,8 +1,8 @@
 'use client';
 
 export default function ErrorPage({
-  message = 'An Error Occured!',
-  title = 'Something went wrong, Failed to fetch data.'
+  message = 'Something went wrong, Failed to fetch data.',
+  title = 'An Error Occured!'
 }) {
   return (
     <article className="not-found">
