@@ -1,8 +1,7 @@
 'use client';
 
-import {useActionState} from 'react';
+import {useState} from 'react';
 import classes from './form.module.css';
-import {getMealFormData, getValidationWithField} from '@/lib/helpers';
 
 const INIT_STATE = {
   field: '',
@@ -14,31 +13,35 @@ function ErrorMessage({message}) {
 }
 
 export default function Form({action, children}) {
-  // TODO: Remove this useActionState if onSubmit is given priority, due to which error message state
-  // is ignored. Instead prefer useState and perform server action.
-  const [state, formAction] = useActionState(action, INIT_STATE);
+  const [fieldInfo, setFieldInfo] = useState(INIT_STATE);
 
-  function handleSubmitForm(event) {
-    const formData = new FormData(event.target);
-    const meal = getMealFormData(formData);
-    const {isDataIncompleteOrInvalid} = getValidationWithField(meal);
+  async function handleSubmitForm(event) {
+    event.preventDefault();
+    try {
+      const formData = new FormData(event.target);
+      const actionResponse = await action(formData);
 
-    if (isDataIncompleteOrInvalid) {
-      event.preventDefault();
+      if (typeof actionResponse === 'object') {
+        const {field, message} = actionResponse;
+        const error = new Error(message);
+        error.field = field;
+        throw error;
+      } else {
+        throw new Error(actionResponse);
+      }
+    } catch (error) {
+      const {field, message} = error;
+      setFieldInfo((prevState) => ({...prevState, field, message}));
     }
   }
 
   // onSubmit is added because of existing issue in Next.js and React v19, resetting form.
   // Ref: https://github.com/edmundhung/conform/issues/681
   return (
-    <form
-      className={classes.form}
-      action={formAction}
-      onSubmit={handleSubmitForm}
-    >
-      {children}
+    <form className={classes.form} onSubmit={handleSubmitForm}>
       {/* Manage field level errors and remove below code, once fix available. */}
-      {state.field && <ErrorMessage message={state.message} />}
+      {fieldInfo.message && <ErrorMessage message={fieldInfo.message} />}
+      {children}
     </form>
   );
 }

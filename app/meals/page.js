@@ -10,7 +10,7 @@ async function Meals() {
     const meals = await getMeals();
     return <MealsGrid meals={meals} />;
   } catch (error) {
-    return <ErrorPage title={error.name} message={error.message} />;
+    return <ErrorPage message={error.message} />;
   }
 }
 
