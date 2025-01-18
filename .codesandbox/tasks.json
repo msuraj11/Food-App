@@ -4,6 +4,10 @@
     {
       "name": "Install Dependencies",
       "command": "pnpm install"
+    },
+    {
+      "name": "Initialise database and store data in .db file",
+      "command": "node init-db.js"
     }
   ],
 
