@@ -4,8 +4,8 @@ import classes from './page.module.css';
 import {getMeal} from '@/lib/meals';
 
 export async function generateMetadata({params}) {
-  const {mealSlug} = await params;
-  const meal = getMeal(mealSlug);
+  const {mealSlug} = params;
+  const meal = await getMeal(mealSlug);
 
   if (!meal) {
     notFound();
@@ -17,8 +17,8 @@ export async function generateMetadata({params}) {
 }
 
 export default async function MealSlugPage({params}) {
-  const {mealSlug} = await params;
-  const meal = getMeal(mealSlug);
+  const {mealSlug} = params;
+  const meal = await getMeal(mealSlug);
 
   if (!meal) {
     notFound();

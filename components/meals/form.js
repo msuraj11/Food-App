@@ -4,7 +4,7 @@ import React, {useState} from 'react';
 import classes from './form.module.css';
 
 const INIT_STATE = {
-  field: '',
+  fields: [],
   message: ''
 };
 
@@ -13,22 +13,35 @@ function renderChildrenWithErrorLoop(children, fieldInfo) {
     if (!React.isValidElement(child)) return child;
 
     const childProps = child?.props;
-    if (child?.type === 'input' && childProps?.name === fieldInfo?.field) {
+    if (
+      ['input', 'textarea'].includes(child?.type) &&
+      [...fieldInfo?.fields].includes(childProps?.name)
+    ) {
       return (
         <>
-          {React.cloneElement(child, null)}
+          {React.cloneElement(child, childProps)}
           <small className={classes['error-message']}>
-            {fieldInfo?.message}
+            {fieldInfo?.message + ' : ' + childProps?.name}
           </small>
         </>
       );
     }
 
-    if (child.type !== 'input' && Array.isArray(childProps?.children)) {
-      const updatedChildren = renderChildrenWithErrorLoop(
-        childProps?.children,
-        fieldInfo
+    if (
+      [...fieldInfo?.fields].includes('image') &&
+      child?.type === 'p' &&
+      childProps.className?.includes('actions')
+    ) {
+      return (
+        <>
+          <small className={classes['error-message']}>{fieldInfo?.message + ' : image.'}</small>
+          {React.cloneElement(child, childProps)}
+        </>
       );
+    }
+
+    if (child.type !== 'input' && Array.isArray(childProps?.children)) {
+      const updatedChildren = renderChildrenWithErrorLoop(childProps?.children, fieldInfo);
       return React.cloneElement(child, null, updatedChildren);
     }
     return child;
@@ -45,16 +58,17 @@ export default function Form({action, children}) {
       const actionResponse = await action(formData);
       setFieldInfo(INIT_STATE);
       if (typeof actionResponse === 'object') {
-        const {field, message} = actionResponse;
+        const {fields, message} = actionResponse;
         const error = new Error(message);
-        error.field = field;
+        error.fields = fields;
         throw error;
       } else {
         throw new Error(actionResponse);
       }
     } catch (error) {
-      const {field, message} = error;
-      setFieldInfo((prevState) => ({...prevState, field, message}));
+      const {fields, message} = error;
+      console.log(fields, message, error);
+      setFieldInfo((prevState) => ({...prevState, fields, message}));
     }
   }
 
